@@ -46,19 +46,8 @@ func main() {
 	}
 
 	event := cloudevents.NewEvent(cloudevents.VersionV03)
-	event.SetType(events.ConnectionType)
-	event.SetSource(events.RetailerPrefix + "kn")
-	event.SetDataContentType("application/json")
-
-	data := events.ConnectionData{
-		System:       events.RetailerPrefix + "kn",
-		Organization: "Knative Coffee",
-		Logo:         events.KnLogo,
-	}
-
-	if err := event.SetData(data); err != nil {
-		log.Fatalf("failed to set data, %s", err.Error())
-	}
+	event.SetSource("kn")
+	event.SetType(events.ResetType)
 
 	if _, err := c.Send(context.Background(), event); err != nil {
 		log.Fatalf("failed to send: %v", err)

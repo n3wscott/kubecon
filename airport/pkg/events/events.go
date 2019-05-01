@@ -33,6 +33,9 @@ const (
 	ActionStatusArrived   = "ArrivedActionStatus"
 	ActionStatusActive    = "ActiveActionStatus"
 	ActionStatusPotential = "PotentialActionStatus"
+
+	// Extensions
+	ExtCause = "cause"
 )
 
 type Product string
@@ -49,6 +52,11 @@ type ConnectionData struct {
 	System       string `json:"system,omitempty"`
 	Organization string `json:"organization,omitempty"`
 	Logo         string `json:"logo,omitempty"`
+}
+
+type OfferData struct {
+	InventoryLevel int     `json:"inventoryLevel,omitempty"`
+	Offer          Product `json:"offer,omitempty"`
 }
 
 type ProductOffer struct {

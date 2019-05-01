@@ -2,18 +2,14 @@ package main
 
 import (
 	"context"
+	"github.com/n3wscott/kubecon/airport/pkg/airport"
 	"log"
 	"os"
 
 	cloudevents "github.com/cloudevents/sdk-go"
 	"github.com/cloudevents/sdk-go/pkg/cloudevents/transport/amqp"
 	"github.com/kelseyhightower/envconfig"
-	"github.com/n3wscott/kubecon/airport/pkg/events"
 	qp "pack.ag/amqp"
-)
-
-const (
-	count = 10
 )
 
 type envConfig struct {
@@ -25,6 +21,8 @@ type envConfig struct {
 
 	AccessKeyName string `envconfig:"AMQP_ACCESS_KEY_NAME" default:"guest"`
 	AccessKey     string `envconfig:"AMQP_ACCESS_KEY" default:"password"`
+
+	Role string `envconfig:"AIRPORT_ROLE" default:"barista"`
 }
 
 func main() {
@@ -45,22 +43,11 @@ func main() {
 		log.Fatalf("failed to create client, %s", err.Error())
 	}
 
-	event := cloudevents.NewEvent(cloudevents.VersionV03)
-	event.SetType(events.ConnectionType)
-	event.SetSource(events.RetailerPrefix + "kn")
-	event.SetDataContentType("application/json")
-
-	data := events.ConnectionData{
-		System:       events.RetailerPrefix + "kn",
-		Organization: "Knative Coffee",
-		Logo:         events.KnLogo,
+	log.Println("Starting as a", env.Role)
+	a := airport.NewKnAirport(c, env.Role)
+	if err := a.Start(context.Background()); err != nil {
+		log.Printf("start returned error, %v", err)
+		os.Exit(1)
 	}
-
-	if err := event.SetData(data); err != nil {
-		log.Fatalf("failed to set data, %s", err.Error())
-	}
-
-	if _, err := c.Send(context.Background(), event); err != nil {
-		log.Fatalf("failed to send: %v", err)
-	}
+	os.Exit(0)
 }
