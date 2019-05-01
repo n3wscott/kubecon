@@ -56,7 +56,8 @@ func main() {
 
 			switch msg {
 			case "o":
-				if err := c.WriteMessage(websocket.TextMessage, []byte("o0")); err != nil {
+				req := fmt.Sprintf("o%d", rand.Intn(3))
+				if err := c.WriteMessage(websocket.TextMessage, []byte(req)); err != nil {
 					log.Println("err:", err)
 				}
 			}
@@ -73,9 +74,7 @@ func main() {
 			return
 		case <-ticker.C:
 
-			n := rand.Intn(3)
-
-			req := fmt.Sprintf("r%d", n)
+			req := fmt.Sprintf("r%d", rand.Intn(2))
 
 			err = c.WriteMessage(websocket.TextMessage, []byte(req)) // todo: we can choose more options.
 			if err != nil {
