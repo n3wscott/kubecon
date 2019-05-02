@@ -24,12 +24,25 @@ func (a *Director) Receive(event cloudevents.Event) {
 			if err := a.Cache.Reset(); err != nil {
 				fmt.Println("failed to reset the cache,", err)
 			}
+
 		case events.DisconnectType:
 			//  subject: Retailer.kn
 
 		case events.ProductOfferType:
-		//   [{"customer":"Retailer.IBMR","offer":["small","medium","large"]}]
-		//   [{"customer":"Retailer.IBMR","offer":["small","medium","large"]},{"customer":"Retailer.IBMR2","offer":["small","medium","large"]}]
+			data := make(events.CustomerOfferData, 0)
+			if err := event.DataAs(&data); err != nil {
+				fmt.Printf("failed to get customer offer data, %s", err)
+				return
+			}
+			fmt.Println("For warehouse", event.Subject())
+
+			for _, stock := range data {
+				for _, inv := range stock.Offer {
+					fmt.Println("Stock", inv, "for", stock.Customer)
+				}
+			}
+			// Store this in the cache.
+			a.Cache.SetWarehouseOffers(event.Subject(), data)
 
 		case events.TransferActionType:
 			// ignore.
@@ -44,7 +57,8 @@ func (a *Director) Receive(event cloudevents.Event) {
 			for _, move := range data {
 				fmt.Println("Move", move.FromLocation, "->", move.ToLocation)
 			}
-			// [{"toLocation":"Retailer.IBMR","fromLocation":"Supplier.IBMS"}]
+			// Store this in the cache.
+			a.Cache.SetCarrierRoute(event.Subject(), data)
 
 		default:
 			fmt.Printf("Unhandled CloudEvent:\n%s", event)

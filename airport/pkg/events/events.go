@@ -24,7 +24,7 @@ const (
 	CarrierOfferType   = "Offer.Service.Transport"
 	TransferActionType = "TransferAction"
 
-	ShipmentCount = 5
+	ShipmentCount = 2
 
 	// OrderStatus can be
 	OrderReleased  = "OrderReleased"

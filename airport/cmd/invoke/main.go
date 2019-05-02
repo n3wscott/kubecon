@@ -70,7 +70,7 @@ func main() {
 		}
 	}()
 
-	ticker := time.NewTicker(2 * time.Second)
+	ticker := time.NewTicker(500 * time.Millisecond)
 	defer ticker.Stop()
 
 	for {
@@ -82,8 +82,8 @@ func main() {
 			if queue != 0 {
 				continue
 			}
-			//req := fmt.Sprintf("r%d", rand.Intn(2))
-			req := "r2"
+			req := fmt.Sprintf("r%d", rand.Intn(3))
+			//req := "r2"
 			err = c.WriteMessage(websocket.TextMessage, []byte(req)) // todo: we can choose more options.
 			if err != nil {
 				log.Println("write:", err)

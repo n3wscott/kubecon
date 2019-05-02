@@ -39,11 +39,16 @@ func (a *Truck) Connect() {
 }
 
 func (a *Truck) Receive(event cloudevents.Event) {
-	//fmt.Printf("CloudEvent:\n%s", event)
-	//
-	//fmt.Printf("----------------------------\n")
-
 	switch event.Type() {
+	case events.ResetType:
+		log.Println("Truck,", a.provider, "resetting.")
+		a.Connect()
+
+	case events.DisconnectType:
+		if event.Subject() == a.provider {
+			a.Connect()
+		}
+
 	case events.TransferActionType:
 		data := &events.TransferActionData{}
 
@@ -51,15 +56,87 @@ func (a *Truck) Receive(event cloudevents.Event) {
 			log.Printf("failed to get transfer data, %v", err)
 		}
 
-		if data.ToLocation == a.provider {
-			switch data.ActionStatus {
-			case events.ActionStatusPotential:
-				log.Println("More", data.Offer, "on the way!")
-			case events.ActionStatusArrived:
-				a.ShipmentArrived(event, data)
-			case events.ActionStatusCompleted:
-				a.UpdateOfferLevel(event.ID(), data.Offer)
-			}
+		// see if we service this.
+		if !a.inRoute(data) {
+			return
 		}
+
+		switch data.ActionStatus {
+		case events.ActionStatusPotential:
+			a.PickUpShipment(event, data)
+
+		case events.ActionStatusArrived:
+			a.DeliverShipment(event, data)
+
+		}
+	}
+}
+
+func (a *Truck) inRoute(data *events.TransferActionData) bool {
+	for _, route := range a.Cache.GetCarrierRoute(a.provider) {
+		if route.ToLocation == data.ToLocation && route.FromLocation == data.FromLocation {
+			log.Println("In route:", data.ToLocation, "-->", data.FromLocation)
+			return true
+		}
+	}
+	log.Println("Not in route:", data.ToLocation, "-->", data.FromLocation)
+	return false
+}
+
+func (a *Truck) PickUpShipment(from cloudevents.Event, box *events.TransferActionData) {
+	if a.Role != TruckRole {
+		return
+	}
+
+	event := cloudevents.NewEvent(cloudevents.VersionV03)
+	event.SetType(events.TransferActionType)
+	event.SetSource(a.provider)
+	event.SetSubject(from.Subject())
+	event.SetExtension(events.ExtCause, from.ID())
+
+	data := events.TransferActionData{
+		ActionStatus: events.ActionStatusActive,
+		ToLocation:   box.ToLocation,
+		FromLocation: box.FromLocation,
+		Offer:        box.Offer,
+	}
+
+	log.Println("Picked up", data.Offer, "and going", data.ToLocation, "-->", data.FromLocation)
+
+	if err := event.SetData(data); err != nil {
+		log.Fatalf("failed to set data, %s", err.Error())
+	}
+
+	if _, err := a.Client.Send(context.Background(), event); err != nil {
+		log.Fatalf("failed to send: %v", err)
+	}
+}
+
+func (a *Truck) DeliverShipment(from cloudevents.Event, box *events.TransferActionData) {
+	if a.Role != TruckRole {
+		return
+	}
+
+	event := cloudevents.NewEvent(cloudevents.VersionV03)
+	event.SetType(events.TransferActionType)
+	event.SetSource(a.provider)
+	event.SetSubject(from.Subject())
+	event.SetExtension(events.ExtCause, from.ID())
+
+	data := events.TransferActionData{
+		ActionStatus: events.ActionStatusCompleted,
+		ToLocation:   box.ToLocation,
+		FromLocation: box.FromLocation,
+		Offer:        box.Offer,
+	}
+
+	log.Println("Delivered", data.Offer, "with route", data.ToLocation, "-->", data.FromLocation)
+
+	if err := event.SetData(data); err != nil {
+		log.Fatalf("failed to set data, %s", err.Error())
+	}
+
+	if _, err := a.Client.Send(context.Background(), event); err != nil {
+		log.Fatalf("failed to send: %v", err)
 	}
 }

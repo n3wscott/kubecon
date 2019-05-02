@@ -1,6 +1,7 @@
 package cache
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/bradfitz/gomemcache/memcache"
 	"github.com/n3wscott/kubecon/airport/pkg/events"
@@ -11,11 +12,12 @@ import (
 
 type Cache interface {
 	Reset() error
-	Get()
-	Set()
 
 	SetCarrierRoute(carrier string, route events.CarrierOfferData)
 	GetCarrierRoute(carrier string) events.CarrierOfferData
+
+	SetWarehouseOffers(warehouse string, offers events.CustomerOfferData)
+	GetWarehouseOffers(warehouse string) events.CustomerOfferData
 
 	SetProductCount(retailer string, product events.Product, count int)
 	GetProductCount(retailer string, product events.Product) int
@@ -38,21 +40,6 @@ func (c *memcacheClient) Reset() error {
 	return c.client.DeleteAll()
 }
 
-func (c *memcacheClient) Get() {
-	it, err := c.client.Get("foo")
-	if err != nil {
-		log.Printf("failed to get on memcached, %s", err.Error())
-	}
-	log.Println("Memcache get:", it)
-
-}
-
-func (c *memcacheClient) Set() {
-	if err := c.client.Set(&memcache.Item{Key: "foo", Value: []byte("my value")}); err != nil {
-		log.Fatalf("failed to set on memcached, %s", err.Error())
-	}
-}
-
 // Carrier
 
 func carrierKey(carrier string) string {
@@ -60,11 +47,64 @@ func carrierKey(carrier string) string {
 }
 
 func (c *memcacheClient) SetCarrierRoute(carrier string, route events.CarrierOfferData) {
+	value, err := json.Marshal(route)
+	if err != nil {
+		log.Println("failed to marshal route,", err)
+		return
+	}
 
+	if err := c.client.Set(&memcache.Item{Key: carrierKey(carrier), Value: value}); err != nil {
+		log.Println("failed to set on memcached,", err.Error())
+	}
 }
 
 func (c *memcacheClient) GetCarrierRoute(carrier string) events.CarrierOfferData {
-	return nil
+	route := make(events.CarrierOfferData, 0)
+
+	it, err := c.client.Get(carrierKey(carrier))
+	if err != nil {
+		log.Printf("failed to get on memcached, %s", err.Error())
+		return route
+	}
+
+	err = json.Unmarshal(it.Value, &route)
+	if err != nil {
+		log.Println("failed to unmarshal route,", err)
+	}
+	return route
+}
+
+// Warehouse
+
+func warehouseKey(warehouse string) string {
+	return strings.ToLower(fmt.Sprintf("warehouse-%s", warehouse))
+}
+
+func (c *memcacheClient) SetWarehouseOffers(warehouse string, offers events.CustomerOfferData) {
+	value, err := json.Marshal(offers)
+	if err != nil {
+		log.Println("failed to marshal offers,", err)
+		return
+	}
+
+	if err := c.client.Set(&memcache.Item{Key: warehouseKey(warehouse), Value: value}); err != nil {
+		log.Println("failed to set on memcached,", err.Error())
+	}
+}
+func (c *memcacheClient) GetWarehouseOffers(warehouse string) events.CustomerOfferData {
+	offers := make(events.CustomerOfferData, 0)
+
+	it, err := c.client.Get(warehouseKey(warehouse))
+	if err != nil {
+		log.Printf("failed to get on memcached, %s", err.Error())
+		return offers
+	}
+
+	err = json.Unmarshal(it.Value, &offers)
+	if err != nil {
+		log.Println("failed to unmarshal offers,", err)
+	}
+	return offers
 }
 
 // Products
@@ -75,7 +115,7 @@ func productKey(retailer string, product events.Product) string {
 
 func (c *memcacheClient) SetProductCount(retailer string, product events.Product, count int) {
 	if err := c.client.Set(&memcache.Item{Key: productKey(retailer, product), Value: []byte(strconv.Itoa(count))}); err != nil {
-		log.Fatalf("failed to set on memcached, %s", err.Error())
+		log.Println("failed to set on memcached,", err.Error())
 	}
 }
 

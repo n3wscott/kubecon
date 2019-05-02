@@ -82,20 +82,16 @@ func (a *Airport) Start(ctx context.Context) error {
 }
 
 func (a *Airport) Receive(event cloudevents.Event) {
-	//fmt.Printf("CloudEvent:\n%s", event)
-	//
-	//fmt.Printf("----------------------------\n")
-
 	if a.retail != nil {
 		go a.retail.Receive(event)
 	}
 
 	if a.warehouse != nil {
-		//go a.warehouse.Receive(event)
+		go a.warehouse.Receive(event)
 	}
 
 	if a.truck != nil {
-		//go a.truck.Receive(event)
+		go a.truck.Receive(event)
 	}
 
 	if a.director != nil {

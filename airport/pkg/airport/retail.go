@@ -22,6 +22,15 @@ func (a *Retail) Receive(event cloudevents.Event) {
 	//fmt.Printf("----------------------------\n")
 
 	switch event.Type() {
+	case events.ResetType:
+		log.Println("Retail,", a.provider, "resetting.")
+		a.Connect()
+
+	case events.DisconnectType:
+		if event.Subject() == a.provider {
+			a.Connect()
+		}
+
 	case events.OrderType:
 		switch event.Source() {
 		case events.PassengerSource:
@@ -188,7 +197,7 @@ func (a *Retail) UpdateOfferLevel(cause string, offer events.Product) {
 		log.Fatalf("failed to send: %v", err)
 	}
 
-	if data.InventoryLevel == 0 {
+	if data.InventoryLevel <= 1 {
 		a.OrderMore(offer)
 	}
 }
