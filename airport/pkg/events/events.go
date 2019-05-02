@@ -24,6 +24,8 @@ const (
 	CarrierOfferType   = "Offer.Service.Transport"
 	TransferActionType = "TransferAction"
 
+	ShipmentCount = 5
+
 	// OrderStatus can be
 	OrderReleased  = "OrderReleased"
 	OrderDelivered = "OrderDelivered"
@@ -42,8 +44,8 @@ type Product string
 
 const (
 	SmallProduct  Product = "small"
-	MediumProduct Product = "Medium"
-	LargeProduct  Product = "Large"
+	MediumProduct Product = "medium"
+	LargeProduct  Product = "large"
 )
 
 // connection prefix goes on system and source.

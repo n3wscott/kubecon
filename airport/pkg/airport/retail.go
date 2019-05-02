@@ -6,7 +6,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/n3wscott/kubecon/airport/pkg/events"
 	"log"
-	"math/rand"
+	"time"
 )
 
 type Retail struct {
@@ -44,7 +44,7 @@ func (a *Retail) Receive(event cloudevents.Event) {
 			case events.ActionStatusPotential:
 				log.Println("More", data.Offer, "on the way!")
 			case events.ActionStatusArrived:
-				log.Println("More", data.Offer, "arrived!")
+				a.ShipmentArrived(event, data)
 			case events.ActionStatusCompleted:
 				a.UpdateOfferLevel(event.ID(), data.Offer)
 			}
@@ -56,6 +56,10 @@ func (a *Retail) Connect() {
 	if a.Role != BaristaRole {
 		return
 	}
+
+	a.Cache.SetProductCount(a.provider, events.SmallProduct, events.ShipmentCount)
+	a.Cache.SetProductCount(a.provider, events.MediumProduct, events.ShipmentCount)
+	a.Cache.SetProductCount(a.provider, events.LargeProduct, events.ShipmentCount)
 
 	event := cloudevents.NewEvent(cloudevents.VersionV03)
 	event.SetType(events.ConnectionType)
@@ -90,12 +94,32 @@ func (a *Retail) HandleOrder(event cloudevents.Event) {
 	}
 }
 
+var served int
+
 func (a *Retail) DeliverOrder(cause string, order *events.OrderData) {
 	if a.Role != BaristaRole {
 		return
 	}
 
-	log.Println("Serving a", order.Offer, ".")
+	slept := time.Duration(0)
+	for i := 0; true; i++ {
+		// give up?
+		if slept.Seconds() > 10 {
+			log.Println("Giving up on ", order.Offer, ", ", cause)
+			return
+		}
+
+		count := a.Cache.GetProductCount(a.provider, order.Offer)
+		if count > 0 {
+			count = a.Cache.AdjustProductCount(a.provider, order.Offer, -1)
+			break
+		}
+		nap := 250 * time.Millisecond
+		time.Sleep(nap)
+		slept += nap
+	}
+	served++ // DEBUG
+	log.Println("Serving a", order.Offer, ". #", served)
 
 	event := cloudevents.NewEvent(cloudevents.VersionV03)
 	event.SetType(events.OrderType)
@@ -148,8 +172,9 @@ func (a *Retail) UpdateOfferLevel(cause string, offer events.Product) {
 	event.SetSubject(string(offer))
 	event.SetExtension(events.ExtCause, cause)
 
+	count := a.Cache.GetProductCount(a.provider, offer)
 	data := events.OfferData{
-		InventoryLevel: rand.Intn(3),
+		InventoryLevel: count,
 		Offer:          offer,
 	}
 
@@ -192,6 +217,18 @@ func (a *Retail) OrderMore(offer events.Product) {
 
 	if _, err := a.Client.Send(context.Background(), event); err != nil {
 		log.Fatalf("failed to send: %v", err)
+	}
+}
+
+func (a *Retail) ShipmentArrived(from cloudevents.Event, shipment *events.TransferActionData) {
+	if a.Role != InventoryRole {
+		return
+	}
+
+	log.Println("More", shipment.Offer, "arrived for", shipment.ToLocation, "!")
+
+	if shipment.ToLocation == a.provider {
+		a.Cache.AdjustProductCount(shipment.ToLocation, shipment.Offer, events.ShipmentCount)
 	}
 }
 

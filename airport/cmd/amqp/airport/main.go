@@ -3,9 +3,12 @@ package main
 import (
 	"context"
 	"github.com/n3wscott/kubecon/airport/pkg/airport"
+	"github.com/n3wscott/kubecon/airport/pkg/cache"
 	"log"
 	"os"
+	"strings"
 
+	"github.com/bradfitz/gomemcache/memcache"
 	cloudevents "github.com/cloudevents/sdk-go"
 	"github.com/cloudevents/sdk-go/pkg/cloudevents/transport/amqp"
 	"github.com/kelseyhightower/envconfig"
@@ -23,6 +26,8 @@ type envConfig struct {
 	AccessKey     string `envconfig:"AMQP_ACCESS_KEY" default:"password"`
 
 	Role string `envconfig:"AIRPORT_ROLE" default:"barista"`
+
+	MemcacheServers string `envconfig:"MEMCACHE_SERVERS" default:"localhost:11211"` // comma separated.
 }
 
 func main() {
@@ -43,8 +48,11 @@ func main() {
 		log.Fatalf("failed to create client, %s", err.Error())
 	}
 
+	mc := memcache.New(strings.Split(env.MemcacheServers, ",")...)
+
 	log.Println("Starting as a", env.Role)
-	a := airport.NewKnAirport(c, env.Role)
+
+	a := airport.NewKnAirport(c, cache.NewCache(mc), env.Role)
 	if err := a.Start(context.Background()); err != nil {
 		log.Printf("start returned error, %v", err)
 		os.Exit(1)

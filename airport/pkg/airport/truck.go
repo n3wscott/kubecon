@@ -37,3 +37,29 @@ func (a *Truck) Connect() {
 		log.Fatalf("failed to send: %v", err)
 	}
 }
+
+func (a *Truck) Receive(event cloudevents.Event) {
+	//fmt.Printf("CloudEvent:\n%s", event)
+	//
+	//fmt.Printf("----------------------------\n")
+
+	switch event.Type() {
+	case events.TransferActionType:
+		data := &events.TransferActionData{}
+
+		if err := event.DataAs(data); err != nil {
+			log.Printf("failed to get transfer data, %v", err)
+		}
+
+		if data.ToLocation == a.provider {
+			switch data.ActionStatus {
+			case events.ActionStatusPotential:
+				log.Println("More", data.Offer, "on the way!")
+			case events.ActionStatusArrived:
+				a.ShipmentArrived(event, data)
+			case events.ActionStatusCompleted:
+				a.UpdateOfferLevel(event.ID(), data.Offer)
+			}
+		}
+	}
+}

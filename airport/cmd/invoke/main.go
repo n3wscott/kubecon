@@ -26,6 +26,9 @@ func main() {
 		os.Exit(1)
 	}
 
+	queue := 0
+	requested := make(map[string]int, 0)
+
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, os.Interrupt)
 
@@ -60,6 +63,8 @@ func main() {
 				if err := c.WriteMessage(websocket.TextMessage, []byte(req)); err != nil {
 					log.Println("err:", err)
 				}
+				log.Printf("ordered: %s", req)
+				queue--
 			}
 			log.Printf("recv: %s", message)
 		}
@@ -74,12 +79,22 @@ func main() {
 			return
 		case <-ticker.C:
 
-			req := fmt.Sprintf("r%d", rand.Intn(2))
-
+			if queue != 0 {
+				continue
+			}
+			//req := fmt.Sprintf("r%d", rand.Intn(2))
+			req := "r2"
 			err = c.WriteMessage(websocket.TextMessage, []byte(req)) // todo: we can choose more options.
 			if err != nil {
 				log.Println("write:", err)
 				return
+			}
+			requested[req]++
+			queue++
+
+			log.Println("---", queue)
+			for k, v := range requested {
+				log.Println(k, "-->", v)
 			}
 
 		case <-interrupt:
