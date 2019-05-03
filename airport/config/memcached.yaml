@@ -22,7 +22,9 @@ spec:
           ports:
             - containerPort: 11211
               name: memcached
+
 ---
+
 apiVersion: v1
 kind: Service
 metadata:

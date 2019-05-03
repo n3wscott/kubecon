@@ -34,10 +34,10 @@ spec:
               - name: SINK_ACCESS_KEY_NAME
                 valueFrom:
                   secretKeyRef:
-                    name: srcdog-amqp
+                    name: airport-amqp
                     key: sink_access_key_name
               - name: SINK_ACCESS_KEY
                 valueFrom:
                   secretKeyRef:
-                    name: srcdog-amqp
+                    name: airport-amqp
                     key: sink_access_key

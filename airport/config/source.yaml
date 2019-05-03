@@ -1,0 +1,21 @@
+apiVersion: sources.eventing.knative.dev/v1alpha1
+kind: ContainerSource
+metadata:
+  name: amqp-source
+  namespace: airport
+spec:
+  image: github.com/n3wscott/kpax/amqp/cmd/source
+  env:
+    # The container source for knative does not support secrets... yet!
+    - name: AMQP_SERVER
+      value: <>
+    - name: AMQP_QUEUE
+      value: <>
+    - name: AMQP_ACCESS_KEY_NAME
+      value: <>
+    - name: AMQP_ACCESS_KEY
+      value: <>
+  sink:
+    apiVersion: eventing.knative.dev/v1alpha1
+    kind: Broker
+    name: default

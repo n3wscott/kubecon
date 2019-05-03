@@ -1,0 +1,13 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: ServiceEntry
+metadata:
+  name: amqp-ext
+  namespace: airport
+spec:
+  hosts:
+  - <>
+  ports:
+  - number: <>
+    name: amqp
+    protocol: TCP
+  location: MESH_INTERNAL

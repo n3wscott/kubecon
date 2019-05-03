@@ -10,9 +10,8 @@ spec:
       apiVersion: serving.knative.dev/v1alpha1
       kind: Service
       name: inbound-event-display
----
 
-# This is a very simple Knative Service that writes the incoming CloudEvent to its log.
+---
 
 apiVersion: serving.knative.dev/v1alpha1
 kind: Service

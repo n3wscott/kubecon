@@ -1,0 +1,80 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: amqp-sink
+  namespace: airport
+spec:
+  selector:
+    app: amqp-sink
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 8080
+
+---
+
+apiVersion: eventing.knative.dev/v1alpha1
+kind: Trigger
+metadata:
+  name: sink
+  namespace: airport
+spec:
+  broker: outbound
+  subscriber:
+    uri: http://amqp-sink.airport.svc.cluster.local/
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: amqp-sink
+  namespace: airport
+spec:
+  selector:
+    matchLabels:
+      app: amqp-sink
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "true"
+      labels:
+        app: amqp-sink
+    spec:
+      containers:
+      - name: user-container
+        image: github.com/n3wscott/kpax/amqp/cmd/sink
+        env:
+          - name: AMQP_SERVER
+            valueFrom:
+              secretKeyRef:
+                name: airport-amqp
+                key: server
+          - name: AMQP_QUEUE
+            valueFrom:
+              secretKeyRef:
+                name: airport-amqp
+                key: queue
+          - name: AMQP_ACCESS_KEY_NAME
+            valueFrom:
+              secretKeyRef:
+                name: airport-amqp
+                key: access_key_name
+          - name: AMQP_ACCESS_KEY
+            valueFrom:
+              secretKeyRef:
+                name: airport-amqp
+                key: access_key
+          - name: SINK_ACCESS_KEY_NAME
+            valueFrom:
+              secretKeyRef:
+                name: airport-amqp
+                key: sink_access_key_name
+          - name: SINK_ACCESS_KEY
+            valueFrom:
+              secretKeyRef:
+                name: airport-amqp
+                key: sink_access_key
+        ports:
+        - containerPort: 8080
+        
