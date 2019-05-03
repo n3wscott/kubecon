@@ -1,0 +1,43 @@
+apiVersion: eventing.knative.dev/v1alpha1
+kind: Trigger
+metadata:
+  name: stocker
+  namespace: airport
+spec:
+  broker: default
+  subscriber:
+    ref:
+      apiVersion: serving.knative.dev/v1alpha1
+      kind: Service
+      name: stocker
+---
+
+apiVersion: serving.knative.dev/v1alpha1
+kind: Service
+metadata:
+  name: stocker
+  namespace: airport
+spec:
+  runLatest:
+    configuration:
+      revisionTemplate:
+        spec:
+          container:
+            image: github.com/n3wscott/kubecon/airport/cmd/airport/
+            env:
+              - name: AIRPORT_ROLE
+                value: "stocker"
+              - name: BROKER
+                value: "http://outbound-broker.airport.svc.cluster.local/"
+              - name: MEMCACHE_SERVERS
+                value: "memcached.airport.svc.cluster.local:11211"
+              - name: SINK_ACCESS_KEY_NAME
+                valueFrom:
+                  secretKeyRef:
+                    name: srcdog-amqp
+                    key: sink_access_key_name
+              - name: SINK_ACCESS_KEY
+                valueFrom:
+                  secretKeyRef:
+                    name: srcdog-amqp
+                    key: sink_access_key

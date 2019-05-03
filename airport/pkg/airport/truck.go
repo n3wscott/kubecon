@@ -22,6 +22,7 @@ func (a *Truck) Connect() {
 	event := cloudevents.NewEvent(cloudevents.VersionV03)
 	event.SetType(events.ConnectionType)
 	event.SetSource(a.provider)
+	event.SetExtension(a.SinkAccessKeyName, a.SinkAccessKey)
 
 	data := events.ConnectionData{
 		System:       a.provider,
@@ -93,6 +94,7 @@ func (a *Truck) PickUpShipment(from cloudevents.Event, box *events.TransferActio
 	event.SetSource(a.provider)
 	event.SetSubject(from.Subject())
 	event.SetExtension(events.ExtCause, from.ID())
+	event.SetExtension(a.SinkAccessKeyName, a.SinkAccessKey)
 
 	data := events.TransferActionData{
 		ActionStatus: events.ActionStatusActive,
@@ -122,6 +124,7 @@ func (a *Truck) DeliverShipment(from cloudevents.Event, box *events.TransferActi
 	event.SetSource(a.provider)
 	event.SetSubject(from.Subject())
 	event.SetExtension(events.ExtCause, from.ID())
+	event.SetExtension(a.SinkAccessKeyName, a.SinkAccessKey)
 
 	data := events.TransferActionData{
 		ActionStatus: events.ActionStatusCompleted,

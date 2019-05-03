@@ -24,6 +24,7 @@ func (a *Warehouse) Connect() {
 	event := cloudevents.NewEvent(cloudevents.VersionV03)
 	event.SetType(events.ConnectionType)
 	event.SetSource(a.provider)
+	event.SetExtension(a.SinkAccessKeyName, a.SinkAccessKey)
 
 	data := events.ConnectionData{
 		System:       a.provider,
@@ -71,9 +72,6 @@ func (a *Warehouse) Receive(event cloudevents.Event) {
 		case events.OrderReleased:
 			a.ShipOrder(event, data)
 
-			//case events.OrderDelivered:
-			//a.DeliverShipment(event, data)
-
 		}
 	}
 }
@@ -103,6 +101,7 @@ func (a *Warehouse) ShipOrder(from cloudevents.Event, order *events.OrderData) {
 	event.SetSource(a.provider)
 	event.SetSubject(uuid.New().String()) // TODO?
 	event.SetExtension(events.ExtCause, from.ID())
+	event.SetExtension(a.SinkAccessKeyName, a.SinkAccessKey)
 
 	data := events.TransferActionData{
 		ActionStatus: events.ActionStatusPotential,

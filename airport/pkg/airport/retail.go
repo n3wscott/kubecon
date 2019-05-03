@@ -66,6 +66,8 @@ func (a *Retail) Connect() {
 		return
 	}
 
+	log.Println("Connecting as", a.Role)
+
 	a.Cache.SetProductCount(a.provider, events.SmallProduct, events.ShipmentCount)
 	a.Cache.SetProductCount(a.provider, events.MediumProduct, events.ShipmentCount)
 	a.Cache.SetProductCount(a.provider, events.LargeProduct, events.ShipmentCount)
@@ -73,6 +75,7 @@ func (a *Retail) Connect() {
 	event := cloudevents.NewEvent(cloudevents.VersionV03)
 	event.SetType(events.ConnectionType)
 	event.SetSource(a.provider)
+	event.SetExtension(a.SinkAccessKeyName, a.SinkAccessKey)
 
 	data := events.ConnectionData{
 		System:       a.provider,
@@ -135,6 +138,7 @@ func (a *Retail) DeliverOrder(cause string, order *events.OrderData) {
 	event.SetSource(a.provider)
 	event.SetExtension(events.ExtCause, cause)
 	event.SetSubject(order.Customer)
+	event.SetExtension(a.SinkAccessKeyName, a.SinkAccessKey)
 
 	data := events.OrderData{
 		Provider:    a.provider,
@@ -180,6 +184,7 @@ func (a *Retail) UpdateOfferLevel(cause string, offer events.Product) {
 	event.SetSource(a.provider)
 	event.SetSubject(string(offer))
 	event.SetExtension(events.ExtCause, cause)
+	event.SetExtension(a.SinkAccessKeyName, a.SinkAccessKey)
 
 	count := a.Cache.GetProductCount(a.provider, offer)
 	data := events.OfferData{
@@ -211,6 +216,7 @@ func (a *Retail) OrderMore(offer events.Product) {
 	event.SetType(events.OrderType)
 	event.SetSource(a.provider)
 	event.SetSubject(uuid.New().String()) // subject is random uuid?
+	event.SetExtension(a.SinkAccessKeyName, a.SinkAccessKey)
 
 	data := events.OrderData{
 		OrderStatus: events.OrderReleased,
@@ -240,34 +246,3 @@ func (a *Retail) ShipmentArrived(from cloudevents.Event, shipment *events.Transf
 		a.Cache.AdjustProductCount(shipment.ToLocation, shipment.Offer, events.ShipmentCount)
 	}
 }
-
-// TODO: for carrier
-//func (a *Retail) ShipmentArrived(from cloudevents.Event, shipment *events.TransferActionData) {
-//	if a.Role != InventoryRole {
-//		return
-//	}
-//
-//	log.Println("More", shipment.Offer, "arrived!")
-//
-//	event := cloudevents.NewEvent(cloudevents.VersionV03)
-//	event.SetType(events.TransferActionType)
-//	event.SetSource(a.provider)
-//	event.SetSubject(from.Subject()) // subject is random uuid?
-//
-//	data := events.TransferActionData{
-//		ActionStatus: events.ActionStatusCompleted,
-//		ToLocation:   shipment.ToLocation,
-//		FromLocation: shipment.FromLocation,
-//		Offer:        shipment.Offer,
-//	}
-//
-//	log.Println("Accepting shipment of ", data.Offer)
-//
-//	if err := event.SetData(data); err != nil {
-//		log.Fatalf("failed to set data, %s", err.Error())
-//	}
-//
-//	if _, err := a.Client.Send(context.Background(), event); err != nil {
-//		log.Fatalf("failed to send: %v", err)
-//	}
-//}

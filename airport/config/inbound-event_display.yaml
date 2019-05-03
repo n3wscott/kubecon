@@ -1,0 +1,28 @@
+apiVersion: eventing.knative.dev/v1alpha1
+kind: Trigger
+metadata:
+  name: inbound-event-display
+  namespace: airport
+spec:
+  broker: default
+  subscriber:
+    ref:
+      apiVersion: serving.knative.dev/v1alpha1
+      kind: Service
+      name: inbound-event-display
+---
+
+# This is a very simple Knative Service that writes the incoming CloudEvent to its log.
+
+apiVersion: serving.knative.dev/v1alpha1
+kind: Service
+metadata:
+  name: inbound-event-display
+  namespace: airport
+spec:
+  runLatest:
+    configuration:
+      revisionTemplate:
+        spec:
+          container:
+            image: github.com/knative/eventing-sources/cmd/event_display

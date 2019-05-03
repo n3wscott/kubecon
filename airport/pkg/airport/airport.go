@@ -16,9 +16,11 @@ const (
 )
 
 type ConnectedRole struct {
-	Role   string
-	Client cloudevents.Client
-	Cache  cache.Cache
+	Role              string
+	Client            cloudevents.Client
+	Cache             cache.Cache
+	SinkAccessKeyName string
+	SinkAccessKey     string
 }
 
 type Airport struct {
@@ -30,12 +32,14 @@ type Airport struct {
 	director  *Director
 }
 
-func NewKnAirport(client cloudevents.Client, store cache.Cache, role string) *Airport {
+func NewKnAirport(client cloudevents.Client, store cache.Cache, role, sinkAccessKeyName, sinkAccessKey string) *Airport {
 	a := &Airport{
 		ConnectedRole: ConnectedRole{
-			Client: client,
-			Role:   role,
-			Cache:  store,
+			Client:            client,
+			Role:              role,
+			Cache:             store,
+			SinkAccessKeyName: sinkAccessKeyName,
+			SinkAccessKey:     sinkAccessKey,
 		},
 	}
 	return a

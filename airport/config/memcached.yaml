@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: memcached
+  namespace: airport
+spec:
+  selector:
+    matchLabels:
+      app: memcached
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "true"
+      labels:
+        app: memcached
+    spec:
+      containers:
+        - name: memcached
+          image: memcached:1.4.36-alpine
+          command: ["memcached"]
+          args: ["-m=64", "-o", "modern", "-v"]
+          ports:
+            - containerPort: 11211
+              name: memcached
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: memcached
+  namespace: airport
+spec:
+  selector:
+    app: memcached
+  ports:
+    - protocol: TCP
+      port: 11211
+      targetPort: 11211

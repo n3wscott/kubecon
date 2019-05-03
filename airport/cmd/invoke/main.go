@@ -19,6 +19,11 @@ type envConfig struct {
 	Path   string `envconfig:"WS_PATH" default:"/"`
 }
 
+const (
+	participantCount = 3
+	offerCount       = 3
+)
+
 func main() {
 	var env envConfig
 	if err := envconfig.Process("", &env); err != nil {
@@ -59,7 +64,7 @@ func main() {
 
 			switch msg {
 			case "o":
-				req := fmt.Sprintf("o%d", rand.Intn(3))
+				req := fmt.Sprintf("o%d", rand.Intn(offerCount))
 				if err := c.WriteMessage(websocket.TextMessage, []byte(req)); err != nil {
 					log.Println("err:", err)
 				}
@@ -82,7 +87,7 @@ func main() {
 			if queue != 0 {
 				continue
 			}
-			req := fmt.Sprintf("r%d", rand.Intn(3))
+			req := fmt.Sprintf("r%d", rand.Intn(participantCount))
 			//req := "r2"
 			err = c.WriteMessage(websocket.TextMessage, []byte(req)) // todo: we can choose more options.
 			if err != nil {

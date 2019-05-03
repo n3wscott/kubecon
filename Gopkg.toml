@@ -1,0 +1,8 @@
+[prune]
+  go-tests = true
+  unused-packages = true
+  non-go = true
+
+[[constraint]]
+  name = "github.com/cloudevents/sdk-go"
+  revision = "9396c7c29f83ee72cc817e0853312fa824b388b7"
