@@ -72,9 +72,13 @@ func main() {
 					log.Println("err:", err)
 				}
 				log.Printf("ordered: %s", req)
+
+			case "c", "s", "f":
+				log.Printf("back with %s", msg)
 				queue--
+			default:
+				log.Printf("recv: %s", message)
 			}
-			log.Printf("recv: %s", message)
 		}
 	}()
 
@@ -83,16 +87,20 @@ func main() {
 
 	updateCounts := func() {
 
-		data := make(map[string][]map[string]string)
+		data := make(map[string][]interface{})
 
-		resp, err := http.Get(fmt.Sprintf("http://%s/airport/data", env.Host))
+		u := fmt.Sprintf("http://%s/airport/data", env.Host)
+
+		resp, err := http.Get(u)
 		if err != nil {
+			log.Println("Retailers error", err)
 			return
 		}
 		defer resp.Body.Close()
 		body, err := ioutil.ReadAll(resp.Body)
 
 		if err := json.Unmarshal(body, &data); err != nil {
+			log.Println("Unmarshal error", err)
 			return
 		}
 

@@ -48,6 +48,7 @@ func main() {
 	event := cloudevents.NewEvent(cloudevents.VersionV03)
 	event.SetSource("kn")
 	event.SetType(events.ResetType)
+	_ = event.SetData(map[string]string{"no": "data"})
 
 	if _, err := c.Send(context.Background(), event); err != nil {
 		log.Fatalf("failed to send: %v", err)

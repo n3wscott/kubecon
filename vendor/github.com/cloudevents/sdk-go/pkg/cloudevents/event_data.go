@@ -39,7 +39,8 @@ func (e *Event) DataBytes() ([]byte, error) {
 		if s, ok := e.Data.(string); ok {
 			b = []byte(s)
 		} else {
-			return nil, errors.New("data was not a byte slice or string")
+			// No data.
+			return []byte(nil), nil
 		}
 	}
 	return b, nil
@@ -60,7 +61,7 @@ func (e Event) DataAs(data interface{}) error { // TODO: Clean this function up
 		if s, ok := e.Data.(string); ok {
 			obj = []byte(s)
 		} else {
-			return errors.New("data was not a byte slice or string")
+			return errors.New("dataas : data was not a byte slice or string")
 		}
 	}
 	if len(obj) == 0 {
