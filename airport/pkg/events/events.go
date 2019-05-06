@@ -15,14 +15,24 @@ const (
 	ControllerSource = "Controller" // the main controller emits these for type:Offer.Product type:Reset type:Disconnect type:Offer.Service.Transport
 	PassengerSource  = "Passenger"  // the user emits these for type:Order
 
-	ConnectionType     = "Connection"
-	ResetType          = "Reset"
-	DisconnectType     = "Disconnect"
+	ConnectionType = "Connection"
+	ResetType      = "Reset"
+	DisconnectType = "Disconnect"
+
 	OrderType          = "Order"
+	OrderReleasedType  = "Order.OrderStatus.OrderReleased"
+	OrderDeliveredType = "Order.OrderStatus.OrderDelivered"
+
+	TransferActionType         = "TransferAction"
+	TransferOrderReleasedType  = "TransferAction.ActionStatus.PotentalActionStatus"
+	TransferOrderAcceptedType  = "TransferAction.ActionStatus.ActiveActionStatus"
+	TransferOrderArrivedType   = "TransferAction.ActionStatus.ArrivedActionStatus"
+	TransferOrderCompletedType = "TransferAction.ActionStatus.CompletedActionStatus"
+
 	OfferType          = "Offer"
+	InventoryLevelType = "Offer.InventoryLevel"
 	ProductOfferType   = "Offer.Product"
 	CarrierOfferType   = "Offer.Service.Transport"
-	TransferActionType = "TransferAction"
 
 	ShipmentCount = 2
 

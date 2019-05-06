@@ -5,6 +5,7 @@ import (
 	"github.com/cloudevents/sdk-go"
 	"github.com/n3wscott/kubecon/airport/pkg/events"
 	"log"
+	"time"
 )
 
 type Truck struct {
@@ -47,10 +48,11 @@ func (a *Truck) Receive(event cloudevents.Event) {
 
 	case events.DisconnectType:
 		if event.Subject() == a.provider {
+			time.Sleep(2 * time.Second)
 			a.Connect()
 		}
 
-	case events.TransferActionType:
+	case events.TransferActionType, events.TransferOrderReleasedType, events.TransferOrderAcceptedType, events.TransferOrderArrivedType, events.TransferOrderCompletedType:
 		data := &events.TransferActionData{}
 
 		if err := event.DataAs(data); err != nil {
@@ -90,7 +92,7 @@ func (a *Truck) PickUpShipment(from cloudevents.Event, box *events.TransferActio
 	}
 
 	event := cloudevents.NewEvent(cloudevents.VersionV03)
-	event.SetType(events.TransferActionType)
+	event.SetType(events.TransferOrderAcceptedType) // updated to v4.6
 	event.SetSource(a.provider)
 	event.SetSubject(from.Subject())
 	event.SetExtension(events.ExtCause, from.ID())
@@ -120,7 +122,7 @@ func (a *Truck) DeliverShipment(from cloudevents.Event, box *events.TransferActi
 	}
 
 	event := cloudevents.NewEvent(cloudevents.VersionV03)
-	event.SetType(events.TransferActionType)
+	event.SetType(events.TransferOrderCompletedType) // updated to v4.6
 	event.SetSource(a.provider)
 	event.SetSubject(from.Subject())
 	event.SetExtension(events.ExtCause, from.ID())

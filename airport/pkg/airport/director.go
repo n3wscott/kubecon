@@ -44,7 +44,7 @@ func (a *Director) Receive(event cloudevents.Event) {
 			// Store this in the cache.
 			a.Cache.SetWarehouseOffers(event.Subject(), data)
 
-		case events.TransferActionType:
+		case events.TransferActionType, events.TransferOrderReleasedType, events.TransferOrderAcceptedType, events.TransferOrderArrivedType, events.TransferOrderCompletedType:
 			// ignore.
 
 		case events.CarrierOfferType:

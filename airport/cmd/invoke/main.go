@@ -1,9 +1,12 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"math/rand"
+	"net/http"
 	"net/url"
 	"os"
 	"os/signal"
@@ -19,7 +22,7 @@ type envConfig struct {
 	Path   string `envconfig:"WS_PATH" default:"/"`
 }
 
-const (
+var (
 	participantCount = 3
 	offerCount       = 3
 )
@@ -78,15 +81,37 @@ func main() {
 	ticker := time.NewTicker(500 * time.Millisecond)
 	defer ticker.Stop()
 
+	updateCounts := func() {
+
+		data := make(map[string][]map[string]string)
+
+		resp, err := http.Get(fmt.Sprintf("http://%s/airport/data", env.Host))
+		if err != nil {
+			return
+		}
+		defer resp.Body.Close()
+		body, err := ioutil.ReadAll(resp.Body)
+
+		if err := json.Unmarshal(body, &data); err != nil {
+			return
+		}
+
+		participantCount = len(data["retailers"])
+		log.Println("Retailers now at", participantCount)
+	}
+
 	for {
 		select {
 		case <-done:
 			return
 		case <-ticker.C:
 
-			if queue != 0 {
+			if queue > 0 {
 				continue
 			}
+
+			updateCounts()
+
 			req := fmt.Sprintf("r%d", rand.Intn(participantCount))
 			//req := "r2"
 			err = c.WriteMessage(websocket.TextMessage, []byte(req)) // todo: we can choose more options.

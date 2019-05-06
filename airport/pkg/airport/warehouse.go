@@ -7,6 +7,7 @@ import (
 	"github.com/n3wscott/kubecon/airport/pkg/events"
 	"log"
 	"strings"
+	"time"
 )
 
 type Warehouse struct {
@@ -49,10 +50,11 @@ func (a *Warehouse) Receive(event cloudevents.Event) {
 
 	case events.DisconnectType:
 		if event.Subject() == a.provider {
+			time.Sleep(2 * time.Second)
 			a.Connect()
 		}
 
-	case events.OrderType:
+	case events.OrderType, events.OrderReleasedType, events.OrderDeliveredType:
 		data := &events.OrderData{}
 		if err := event.DataAs(data); err != nil {
 			log.Printf("failed to get order data, %v", err)
@@ -97,7 +99,7 @@ func (a *Warehouse) ShipOrder(from cloudevents.Event, order *events.OrderData) {
 	}
 
 	event := cloudevents.NewEvent(cloudevents.VersionV03)
-	event.SetType(events.TransferActionType)
+	event.SetType(events.TransferOrderReleasedType) // updated to v4.6
 	event.SetSource(a.provider)
 	event.SetSubject(uuid.New().String()) // TODO?
 	event.SetExtension(events.ExtCause, from.ID())

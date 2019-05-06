@@ -28,10 +28,11 @@ func (a *Retail) Receive(event cloudevents.Event) {
 
 	case events.DisconnectType:
 		if event.Subject() == a.provider {
+			time.Sleep(2 * time.Second)
 			a.Connect()
 		}
 
-	case events.OrderType:
+	case events.OrderType, events.OrderReleasedType, events.OrderDeliveredType:
 		switch event.Source() {
 		case events.PassengerSource:
 			a.HandleOrder(event)
@@ -41,7 +42,7 @@ func (a *Retail) Receive(event cloudevents.Event) {
 			log.Println("Controller ordered something... TODO.")
 		}
 
-	case events.TransferActionType:
+	case events.TransferActionType, events.TransferOrderReleasedType, events.TransferOrderAcceptedType, events.TransferOrderArrivedType, events.TransferOrderCompletedType:
 		data := &events.TransferActionData{}
 
 		if err := event.DataAs(data); err != nil {
@@ -134,7 +135,7 @@ func (a *Retail) DeliverOrder(cause string, order *events.OrderData) {
 	log.Println("Serving a", order.Offer, ". #", served)
 
 	event := cloudevents.NewEvent(cloudevents.VersionV03)
-	event.SetType(events.OrderType)
+	event.SetType(events.OrderDeliveredType) // updated to v4.6
 	event.SetSource(a.provider)
 	event.SetExtension(events.ExtCause, cause)
 	event.SetSubject(order.Customer)
@@ -180,7 +181,7 @@ func (a *Retail) UpdateOfferLevel(cause string, offer events.Product) {
 	}
 
 	event := cloudevents.NewEvent(cloudevents.VersionV03)
-	event.SetType(events.OfferType)
+	event.SetType(events.InventoryLevelType) // changed to v4.6
 	event.SetSource(a.provider)
 	event.SetSubject(string(offer))
 	event.SetExtension(events.ExtCause, cause)
@@ -213,7 +214,7 @@ func (a *Retail) OrderMore(offer events.Product) {
 	}
 
 	event := cloudevents.NewEvent(cloudevents.VersionV03)
-	event.SetType(events.OrderType)
+	event.SetType(events.OrderReleasedType) //updated v4.6
 	event.SetSource(a.provider)
 	event.SetSubject(uuid.New().String()) // subject is random uuid?
 	event.SetExtension(a.SinkAccessKeyName, a.SinkAccessKey)
