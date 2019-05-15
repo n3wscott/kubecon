@@ -61,11 +61,11 @@ func (e Event) DataAs(data interface{}) error { // TODO: Clean this function up
 		if s, ok := e.Data.(string); ok {
 			obj = []byte(s)
 		} else {
-			return errors.New("dataas : data was not a byte slice or string")
+			return errors.New("data was not a byte slice or string")
 		}
 	}
 	if len(obj) == 0 {
-		// no data.
+		// No data.
 		return nil
 	}
 	if e.Context.GetDataContentEncoding() == Base64 {

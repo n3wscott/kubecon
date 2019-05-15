@@ -1,0 +1,31 @@
+apiVersion: eventing.knative.dev/v1alpha1
+kind: Trigger
+metadata:
+  name: file
+spec:
+  broker: default
+  filter:
+    sourceAndType:
+      type: google.gcs
+  subscriber:
+    ref:
+      apiVersion: serving.knative.dev/v1alpha1
+      kind: Service
+      name: file
+
+---
+
+apiVersion: serving.knative.dev/v1alpha1
+kind: Service
+metadata:
+  name: file
+spec:
+  runLatest:
+    configuration:
+      revisionTemplate:
+        spec:
+          container:
+            image: github.com/n3wscott/kubecon/sps/rpn/cmd/file/
+            env:
+              - name: BROKER
+                value: "http://default-broker.default.svc.cluster.local/"

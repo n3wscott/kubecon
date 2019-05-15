@@ -5,5 +5,4 @@
 
 [[constraint]]
   name = "github.com/cloudevents/sdk-go"
-  revision = "1068e2f525dffe599397dba86456909f8b479efd"
-  source = "github.com/n3wscott/sdk-go"
+  version = "=0.7.0"
