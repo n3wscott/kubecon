@@ -122,3 +122,5 @@ Enable Eventing:
  # edit the default namespace and add the label knative-eventing-injection=enabled
  kubectl get namespaces -l knative-eventing-injection=enabled
 ```
+
+Ready for demo.
