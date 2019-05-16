@@ -1,0 +1,25 @@
+apiVersion: eventing.knative.dev/v1alpha1
+kind: Trigger
+metadata:
+  name: event-display
+spec:
+  broker: default
+  subscriber:
+    ref:
+      apiVersion: serving.knative.dev/v1alpha1
+      kind: Service
+      name: event-display
+
+---
+
+apiVersion: serving.knative.dev/v1alpha1
+kind: Service
+metadata:
+  name: event-display
+spec:
+  runLatest:
+    configuration:
+      revisionTemplate:
+        spec:
+          container:
+            image: github.com/knative/eventing-sources/cmd/event_display

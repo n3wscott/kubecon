@@ -6,15 +6,26 @@ metadata:
 spec:
   image: github.com/n3wscott/kpax/amqp/cmd/source
   env:
-    # The container source for knative does not support secrets... yet!
     - name: AMQP_SERVER
-      value: <>
+      valueFrom:
+        secretKeyRef:
+          name: airport-amqp
+          key: server
     - name: AMQP_QUEUE
-      value: <>
+      valueFrom:
+        secretKeyRef:
+          name: airport-amqp
+          key: queue
     - name: AMQP_ACCESS_KEY_NAME
-      value: <>
+      valueFrom:
+        secretKeyRef:
+          name: airport-amqp
+          key: access_key_name
     - name: AMQP_ACCESS_KEY
-      value: <>
+      valueFrom:
+        secretKeyRef:
+          name: airport-amqp
+          key: access_key
   sink:
     apiVersion: eventing.knative.dev/v1alpha1
     kind: Broker

@@ -5,9 +5,9 @@ metadata:
   namespace: airport
 spec:
   hosts:
-  - <>
+  - <ampq host url>
   ports:
-  - number: <>
+  - number: <port number>
     name: amqp
     protocol: TCP
   location: MESH_INTERNAL
