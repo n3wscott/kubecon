@@ -22,8 +22,7 @@ func main() {
 		Name: "Nate",
 	})
 
-	ctx := cloudevents.ContextWithTarget(context.Background(), "http://localhost:8181")
-	if _, err := client.Send(ctx, event); err != nil {
+	if _, err := client.Send(context.Background(), event); err != nil {
 		panic(err)
 	}
 	fmt.Println("sent")

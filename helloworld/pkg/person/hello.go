@@ -1,23 +1,7 @@
 package person
 
-import (
-	"fmt"
-	"github.com/cloudevents/sdk-go"
-)
-
 type Hello struct {
 	Name string `json:"name"`
-}
-
-func Receive(event cloudevents.Event) {
-	data := &Hello{}
-	if err := event.DataAs(data); err != nil {
-		fmt.Println(err)
-		return
-	}
-	fmt.Printf("Hello, %s!\n", data.Name)
-
-	fmt.Printf("\n---☁️  Event---\n%s\n\n", event)
 }
 
 /*
