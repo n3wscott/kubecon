@@ -35,7 +35,8 @@ func main() {
 	}
 
 	log.Printf("will listen on :8080\n")
-	log.Fatalf("failed to start receiver: %s", c.StartReceiver(context.Background(), calculate))
+	log.Fatalf("failed to start receiver: %s",
+		c.StartReceiver(context.Background(), calculate))
 }
 
 const (
@@ -50,6 +51,7 @@ func calculate(event cloudevents.Event, resp *cloudevents.EventResponse) {
 		return
 	}
 
+	// calculate one step using reverse polish notation
 	exp, done := rpn.Calculate(data.Exp)
 
 	r := cloudevents.NewEvent()
