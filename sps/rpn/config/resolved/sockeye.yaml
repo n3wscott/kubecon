@@ -1,0 +1,58 @@
+apiVersion: eventing.knative.dev/v1alpha1
+kind: Trigger
+metadata:
+  name: sockeye-file
+spec:
+  broker: default
+  filter:
+    sourceAndType:
+      type: google.gcs
+  subscriber:
+    ref:
+      apiVersion: serving.knative.dev/v1alpha1
+      kind: Service
+      name: sockeye
+---
+apiVersion: eventing.knative.dev/v1alpha1
+kind: Trigger
+metadata:
+  name: sockeye-rpn-expression
+spec:
+  broker: default
+  filter:
+    sourceAndType:
+      type: sps.demo.rpn.expression
+  subscriber:
+    ref:
+      apiVersion: serving.knative.dev/v1alpha1
+      kind: Service
+      name: sockeye
+---
+apiVersion: eventing.knative.dev/v1alpha1
+kind: Trigger
+metadata:
+  name: sockeye-rpn-result
+spec:
+  broker: default
+  filter:
+    sourceAndType:
+      type: sps.demo.rpn.result
+  subscriber:
+    ref:
+      apiVersion: serving.knative.dev/v1alpha1
+      kind: Service
+      name: sockeye
+---
+apiVersion: serving.knative.dev/v1alpha1
+kind: Service
+metadata:
+  name: sockeye
+spec:
+  runLatest:
+    configuration:
+      revisionTemplate:
+        spec:
+          container:
+            image: gcr.io/plori-nicholss/sockeye-44b3730b76fec6721f59855a66766a33@sha256:fa95adbab41b47bf46c01d4d1bf5a0caf126904ad38def69e908e689f1dd8e29
+
+---

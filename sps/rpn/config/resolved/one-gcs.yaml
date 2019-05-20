@@ -1,0 +1,16 @@
+apiVersion: sources.aikas.org/v1alpha1
+kind: GCSSource
+metadata:
+  name: reverse-polish-notation-gcs
+spec:
+  bucket: reverse-polish-notation
+  gcsCredsSecret:
+    key: key.json
+    name: google-cloud-key
+  googleCloudProject: plori-nicholss
+  sink:
+    apiVersion: eventing.knative.dev/v1alpha1
+    kind: Broker
+    name: default
+
+---

@@ -12,9 +12,7 @@ spec:
       apiVersion: serving.knative.dev/v1alpha1
       kind: Service
       name: reverse-polish-notation
-
 ---
-
 apiVersion: serving.knative.dev/v1alpha1
 kind: Service
 metadata:
@@ -25,4 +23,6 @@ spec:
       revisionTemplate:
         spec:
           container:
-            image: github.com/n3wscott/kubecon/sps/rpn/cmd/rpn/
+            image: gcr.io/plori-nicholss/rpn-5cac758c92b0d15e15189dc0eeb8315e@sha256:aed1cbb6986ee31c6c465d3d2caf62df73ca4c9935234c8db5d436e2acf13d44
+
+---

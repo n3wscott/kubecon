@@ -1,28 +1,31 @@
 apiVersion: eventing.knative.dev/v1alpha1
 kind: Trigger
 metadata:
-  name: reverse-polish-notation
+  name: file
 spec:
   broker: default
   filter:
     sourceAndType:
-      type: sps.demo.rpn.expression
+      type: google.gcs
   subscriber:
     ref:
       apiVersion: serving.knative.dev/v1alpha1
       kind: Service
-      name: reverse-polish-notation
-
+      name: file
 ---
-
 apiVersion: serving.knative.dev/v1alpha1
 kind: Service
 metadata:
-  name: reverse-polish-notation
+  name: file
 spec:
   runLatest:
     configuration:
       revisionTemplate:
         spec:
           container:
-            image: github.com/n3wscott/kubecon/sps/rpn/cmd/rpn/
+            env:
+            - name: BROKER
+              value: http://default-broker.default.svc.cluster.local/
+            image: gcr.io/plori-nicholss/file-b0815ee0b76cadf7ab4e43a03981338f@sha256:56acec6037960697b7e0a6800b3675af2890a5b37eb83b50f6d83cd642bc770d
+
+---

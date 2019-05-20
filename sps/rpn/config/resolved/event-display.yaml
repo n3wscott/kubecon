@@ -1,28 +1,25 @@
 apiVersion: eventing.knative.dev/v1alpha1
 kind: Trigger
 metadata:
-  name: reverse-polish-notation
+  name: event-display
 spec:
   broker: default
-  filter:
-    sourceAndType:
-      type: sps.demo.rpn.expression
   subscriber:
     ref:
       apiVersion: serving.knative.dev/v1alpha1
       kind: Service
-      name: reverse-polish-notation
-
+      name: event-display
 ---
-
 apiVersion: serving.knative.dev/v1alpha1
 kind: Service
 metadata:
-  name: reverse-polish-notation
+  name: event-display
 spec:
   runLatest:
     configuration:
       revisionTemplate:
         spec:
           container:
-            image: github.com/n3wscott/kubecon/sps/rpn/cmd/rpn/
+            image: gcr.io/plori-nicholss/event_display-bb44423e21d22fe93666b961f6cfb013@sha256:df81b859c0576ba133b5318ad09bde0adbfb9a7f07d5972b6961ae9b037dc3ff
+
+---
