@@ -24,7 +24,7 @@ const (
 	OrderDeliveredType = "Order.OrderStatus.OrderDelivered"
 
 	TransferActionType         = "TransferAction"
-	TransferOrderReleasedType  = "TransferAction.ActionStatus.PotentalActionStatus"
+	TransferOrderReleasedType  = "TransferAction.ActionStatus.PotentialActionStatus"
 	TransferOrderAcceptedType  = "TransferAction.ActionStatus.ActiveActionStatus"
 	TransferOrderArrivedType   = "TransferAction.ActionStatus.ArrivedActionStatus"
 	TransferOrderCompletedType = "TransferAction.ActionStatus.CompletedActionStatus"

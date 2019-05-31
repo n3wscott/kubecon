@@ -13,6 +13,8 @@ const (
 	WarehouseRole = "warehouse"
 	TruckRole     = "truck"
 	DirectorRole  = "director"
+
+	name = "knative"
 )
 
 type ConnectedRole struct {
@@ -51,7 +53,7 @@ func (a *Airport) Start(ctx context.Context) error {
 		a.retail = &Retail{
 			ConnectedRole: a.ConnectedRole,
 			name:          "Knative Coffee",
-			provider:      events.RetailerPrefix + "kn",
+			provider:      events.RetailerPrefix + name,
 		}
 		a.retail.Connect()
 
@@ -59,7 +61,7 @@ func (a *Airport) Start(ctx context.Context) error {
 		a.warehouse = &Warehouse{
 			ConnectedRole: a.ConnectedRole,
 			name:          "Knative Warehouse",
-			provider:      events.SupplierPrefix + "kn",
+			provider:      events.SupplierPrefix + name,
 		}
 		a.warehouse.Connect()
 
@@ -67,7 +69,7 @@ func (a *Airport) Start(ctx context.Context) error {
 		a.truck = &Truck{
 			ConnectedRole: a.ConnectedRole,
 			name:          "Knative Trucking",
-			provider:      events.CarrierPrefix + "kn",
+			provider:      events.CarrierPrefix + name,
 		}
 		a.truck.Connect()
 
@@ -75,9 +77,9 @@ func (a *Airport) Start(ctx context.Context) error {
 		a.director = &Director{
 			ConnectedRole: a.ConnectedRole,
 			providers: []string{
-				events.RetailerPrefix + "kn",
-				events.SupplierPrefix + "kn",
-				events.CarrierPrefix + "kn",
+				events.RetailerPrefix + name,
+				events.SupplierPrefix + name,
+				events.CarrierPrefix + name,
 			},
 		}
 	}

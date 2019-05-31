@@ -203,7 +203,7 @@ func (a *Retail) UpdateOfferLevel(cause string, offer events.Product) {
 		log.Fatalf("failed to send: %v", err)
 	}
 
-	if data.InventoryLevel <= 1 {
+	if data.InventoryLevel == 1 {
 		a.OrderMore(offer)
 	}
 }

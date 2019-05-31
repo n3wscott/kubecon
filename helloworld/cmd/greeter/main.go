@@ -11,7 +11,7 @@ import (
 
 func main() {
 	client, _ := cloudevents.NewClient(
-		makeOutboundNATS(),
+		makeOutboundHTTP(),
 		cloudevents.WithUUIDs(),
 	)
 
@@ -19,7 +19,7 @@ func main() {
 	event.SetSource("/kubecon/demo/barcelona-2019")
 	event.SetType("com.n3wscott.hello")
 	_ = event.SetData(&person.Hello{
-		Name: "Nate",
+		Name: "Hanna",
 	})
 
 	if _, err := client.Send(context.Background(), event); err != nil {
@@ -38,7 +38,7 @@ func makeOutboundNATS() transport.Transport {
 
 func makeOutboundHTTP() transport.Transport {
 	t, err := cloudevents.NewHTTPTransport(
-		cloudevents.WithTarget("http://localhost:8080/"),
+		cloudevents.WithTarget("http://localhost:8181/"),
 		cloudevents.WithBinaryEncoding(),
 	)
 	if err != nil {
